@@ -3,10 +3,9 @@ package ru.sberbank.crud.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import ru.sberbank.crud.dao.UserDAO;
+import ru.sberbank.crud.models.User;
 
 @Controller
 @RequestMapping("/users")
@@ -15,14 +14,26 @@ public class userController {
     private UserDAO dao;
 
     @GetMapping
-    public String getAllUsers(Model model) {
+    public String getAll(Model model) {
         model.addAttribute("users", dao.getUsers());
         return "users";
     }
 
     @GetMapping("/{id}")
-    public String getUser(@PathVariable("id") Integer id, Model model) {
+    public String getById(@PathVariable("id") Integer id, Model model) {
         model.addAttribute("user", dao.getUser(id));
         return "user";
+    }
+
+    @GetMapping("/new")
+    public String newUser(Model model) {
+        model.addAttribute("user", new User());
+        return "new";
+    }
+
+    @PostMapping
+    public String create(@ModelAttribute("user") User user) {
+        dao.save(user);
+        return "redirect:/users";
     }
 }

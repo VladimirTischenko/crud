@@ -25,4 +25,9 @@ public class UserDAO {
     public User getUser(int id) {
         return users.stream().filter(user -> user.getId() == id).findAny().orElse(null);
     }
+
+    public void save(User user) {
+        user.setId(++COUNT);
+        users.add(user);
+    }
 }
