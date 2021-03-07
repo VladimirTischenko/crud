@@ -21,7 +21,7 @@ public class userController {
 
     @GetMapping("/{id}")
     public String getById(@PathVariable("id") Integer id, Model model) {
-        model.addAttribute("user", dao.getUser(id));
+        model.addAttribute("user", dao.getById(id));
         return "user";
     }
 
@@ -34,6 +34,25 @@ public class userController {
     @PostMapping
     public String create(@ModelAttribute("user") User user) {
         dao.save(user);
+        return "redirect:/users";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String edit(@PathVariable("id") Integer id, Model model) {
+        User user = dao.getById(id);
+        model.addAttribute("user", user);
+        return "edit";
+    }
+
+    @PatchMapping
+    public String update(@ModelAttribute("user") User user) {
+        dao.update(user);
+        return "redirect:/users";
+    }
+
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable("id") Integer id) {
+        dao.delete(id);
         return "redirect:/users";
     }
 }

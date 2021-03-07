@@ -22,12 +22,21 @@ public class UserDAO {
         return users;
     }
 
-    public User getUser(int id) {
+    public User getById(int id) {
         return users.stream().filter(user -> user.getId() == id).findAny().orElse(null);
     }
 
     public void save(User user) {
         user.setId(++COUNT);
         users.add(user);
+    }
+
+    public void update(User updatedUser) {
+        User existedUser = getById(updatedUser.getId());
+        existedUser.setName(updatedUser.getName());
+    }
+
+    public void delete(Integer id) {
+        users.removeIf(u -> u.getId().equals(id));
     }
 }
