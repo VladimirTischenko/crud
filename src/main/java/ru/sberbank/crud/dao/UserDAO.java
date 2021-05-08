@@ -81,12 +81,12 @@ public class UserDAO {
         }
     }
 
-    public void update(User updatedUser) {
+    public void update(int id, User updatedUser) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("update users set name=? where id=?");
 
             preparedStatement.setString(1, updatedUser.getName());
-            preparedStatement.setInt(2, updatedUser.getId());
+            preparedStatement.setInt(2, id);
 
             preparedStatement.executeUpdate();
         } catch (SQLException throwables) {
