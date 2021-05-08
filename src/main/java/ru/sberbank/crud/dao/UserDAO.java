@@ -49,29 +49,58 @@ public class UserDAO {
     }
 
     public User getById(int id) {
-//        return users.stream().filter(user -> user.getId() == id).findAny().orElse(null);
-        return null;
+        User user = null;
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users where id=?");
+            preparedStatement.setInt(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            resultSet.next();
+
+            user = new User();
+
+            user.setId(resultSet.getInt("id"));
+            user.setName(resultSet.getString("name"));
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return user;
     }
 
     public void save(User user) {
         try {
-            Statement statement = connection.createStatement();
-            String query = "insert into users values(" + ++COUNT + ", '" + user.getName() + "')";
-            statement.executeUpdate(query);
+            PreparedStatement preparedStatement = connection.prepareStatement("insert into users values(?, ?)");
+
+            preparedStatement.setInt(1, ++COUNT);
+            preparedStatement.setString(2, user.getName());
+
+            preparedStatement.executeUpdate();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-
-        user.setId(++COUNT);
-//        users.add(user);
     }
 
     public void update(User updatedUser) {
-        User existedUser = getById(updatedUser.getId());
-        existedUser.setName(updatedUser.getName());
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("update users set name=? where id=?");
+
+            preparedStatement.setString(1, updatedUser.getName());
+            preparedStatement.setInt(2, updatedUser.getId());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
     public void delete(Integer id) {
-//        users.removeIf(u -> u.getId().equals(id));
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("delete from users where id=?");
+            preparedStatement.setInt(1, id);
+            preparedStatement.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 }
