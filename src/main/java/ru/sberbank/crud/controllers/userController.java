@@ -15,7 +15,7 @@ public class userController {
 
     @GetMapping
     public String getAll(Model model) {
-        model.addAttribute("users", dao.getUsers());
+        model.addAttribute("users", dao.getAll());
         return "users";
     }
 
