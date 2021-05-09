@@ -1,106 +1,42 @@
 package ru.sberbank.crud.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.sberbank.crud.models.User;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class UserDAO {
-    private static final String URL = "jdbc:postgresql://localhost:5432/crud";
-    private static final String USERNAME = "postgres";
-    private static final String PASSWORD = "postgres";
-
     private static int COUNT = 2;
-    private static Connection connection;
+    private final JdbcTemplate jdbcTemplate;
 
-    static {
-        try {
-            Class.forName("org.postgresql.Driver");
-            connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
-        }
+    @Autowired
+    public UserDAO(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public List<User> getAll() {
-        List<User> users = new ArrayList<>();
-
-        try {
-            Statement statement = connection.createStatement();
-            String query = "select * from users";
-            ResultSet resultSet = statement.executeQuery(query);
-
-            while (resultSet.next()) {
-                User user = new User();
-
-                user.setId(resultSet.getInt("id"));
-                user.setName(resultSet.getString("name"));
-
-                users.add(user);
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-        return users;
+        return jdbcTemplate.query("select * from users", new BeanPropertyRowMapper<>(User.class));
     }
 
     public User getById(int id) {
-        User user = null;
-
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users where id=?");
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            resultSet.next();
-
-            user = new User();
-
-            user.setId(resultSet.getInt("id"));
-            user.setName(resultSet.getString("name"));
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return user;
+        return jdbcTemplate
+                .query("select * from users where id=?", new Object[]{id}, new BeanPropertyRowMapper<>(User.class))
+                .stream().findAny().orElse(null);
     }
 
     public void save(User user) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement("insert into users values(?, ?)");
-
-            preparedStatement.setInt(1, ++COUNT);
-            preparedStatement.setString(2, user.getName());
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+        jdbcTemplate.update("insert into users values(?, ?)", ++COUNT, user.getName());
     }
 
-    public void update(int id, User updatedUser) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement("update users set name=? where id=?");
-
-            preparedStatement.setString(1, updatedUser.getName());
-            preparedStatement.setInt(2, id);
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+    public void update(int id, User user) {
+        jdbcTemplate.update("update users set name=? where id=?", user.getName(), id);
     }
 
     public void delete(Integer id) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement("delete from users where id=?");
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+        jdbcTemplate.update("delete from users where id=?", id);
     }
 }
